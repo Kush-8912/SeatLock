@@ -69,7 +69,7 @@ function OrderCard({ order, cutoffHours, onCancelled, defaultOpen }) {
           </div>
         </div>
       )}
-      <ConfirmDialog open={confirming} title="Cancel this order?" confirmLabel="Cancel order" danger busy={busy} onConfirm={cancel} onClose={() => setConfirming(false)}>
+      <ConfirmDialog open={confirming} title="Cancel this order?" confirmLabel="Cancel order" cancelLabel="Keep tickets" danger busy={busy} onConfirm={cancel} onClose={() => setConfirming(false)}>
         All {order.tickets.length} ticket{order.tickets.length > 1 ? 's' : ''} will be voided and {money(order.amount)} refunded. Your seats go back on sale immediately.
       </ConfirmDialog>
     </article>

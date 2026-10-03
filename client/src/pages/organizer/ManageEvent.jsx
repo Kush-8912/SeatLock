@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { CheckCircle2, ExternalLink, Pencil, Rocket, Search, Trash2, XCircle, XOctagon } from 'lucide-react';
 import { api } from '../../lib/api';
-import { dateTime, money, pct, time } from '../../lib/format';
+import { amount, dateTime, money, pct, plural, time } from '../../lib/format';
 import { useEventChannel } from '../../hooks/useEventChannel';
 import { useDebounced } from '../../hooks/useDebounced';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
@@ -123,7 +123,7 @@ export function ManageEvent() {
       <ConfirmDialog open={dialog === 'delete'} title="Delete this draft?" confirmLabel="Delete" danger busy={busy} onConfirm={() => act('delete')} onClose={() => setDialog(null)}>
         This can&apos;t be undone.
       </ConfirmDialog>
-      <ConfirmDialog open={dialog === 'cancel'} title="Cancel this event?" confirmLabel="Cancel event & refund all" danger busy={busy} onConfirm={() => act('cancel')} onClose={() => setDialog(null)}>
+      <ConfirmDialog open={dialog === 'cancel'} title="Cancel this event?" confirmLabel="Cancel event & refund all" cancelLabel="Keep event" danger busy={busy} onConfirm={() => act('cancel')} onClose={() => setDialog(null)}>
         Sales stop immediately, every ticket is voided and every buyer is refunded in full. This can&apos;t be undone.
       </ConfirmDialog>
     </div>
@@ -148,7 +148,7 @@ function Overview({ eventId }) {
   if (!stats) return <PageLoader />;
 
   const cards = [
-    ['Revenue', money(stats.revenue), `${stats.ordersPaid} orders`],
+    ['Revenue', amount(stats.revenue), plural(stats.ordersPaid, 'order')],
     ['Tickets sold', `${stats.sold} / ${stats.capacity}`, `${stats.held} on hold right now`],
     ['Sell-through', pct(stats.sellThrough), `${stats.available} seats left`],
     ['Checked in', `${stats.checkins.checkedIn} / ${stats.checkins.issued}`, stats.checkins.issued ? pct(stats.checkins.checkedIn / stats.checkins.issued) : '—'],
@@ -166,7 +166,7 @@ function Overview({ eventId }) {
         ))}
       </div>
       {stats.refunds.count > 0 && (
-        <p className="text-sm text-slate-500">{stats.refunds.count} order{stats.refunds.count > 1 ? 's' : ''} cancelled · {money(stats.refunds.amount)} refunded</p>
+        <p className="text-sm text-slate-500">{stats.refunds.count} order{stats.refunds.count > 1 ? 's' : ''} cancelled · {amount(stats.refunds.amount)} refunded</p>
       )}
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -186,7 +186,7 @@ function Overview({ eventId }) {
                       <span className="tabular-nums text-slate-600">{t.sold}/{t.capacity}</span>
                     </div>
                   </td>
-                  <td className="py-2.5 text-right tabular-nums">{money(t.revenue)}</td>
+                  <td className="py-2.5 text-right tabular-nums">{amount(t.revenue)}</td>
                 </tr>
               ))}
             </tbody>
@@ -203,8 +203,8 @@ function Overview({ eventId }) {
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                   <XAxis dataKey="date" tickFormatter={(d) => d.slice(5)} fontSize={12} />
                   <YAxis allowDecimals={false} fontSize={12} />
-                  <Tooltip formatter={(v, name) => (name === 'revenue' ? money(v) : v)} />
-                  <Bar dataKey="tickets" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                  <Tooltip formatter={(v) => [v, 'Tickets']} />
+                  <Bar dataKey="tickets" fill="#6366f1" radius={[4, 4, 0, 0]} maxBarSize={48} isAnimationActive={false} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -266,7 +266,7 @@ function CheckIn({ eventId, disabled }) {
         <form className="mt-6 flex gap-2" onSubmit={(e) => { e.preventDefault(); submit(code); }}>
           <label className="sr-only" htmlFor="code">Ticket code</label>
           <input id="code" className="input font-mono" placeholder="Or paste a ticket code: SL1.…" value={code} onChange={(e) => setCode(e.target.value)} />
-          <button className="btn-secondary" disabled={busy || !code.trim()}>{busy ? <Spinner className="h-4 w-4" /> : 'Check in'}</button>
+          <button className="btn-secondary whitespace-nowrap" disabled={busy || !code.trim()}>{busy ? <Spinner className="h-4 w-4" /> : 'Check in'}</button>
         </form>
       </section>
       <section aria-live="assertive">

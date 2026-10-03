@@ -16,26 +16,29 @@ const objectId = z.string().regex(/^[a-f\d]{24}$/i, 'Invalid id');
 const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 const tier = z.object({
-  name: z.string().trim().min(1).max(30),
-  price: z.number().int('Price must be a whole number').min(0).max(100000),
+  name: z.string().trim().min(1, 'Tier name is required').max(30),
+  price: z.number('Price must be a number').int('Price must be a whole number').min(0, 'Price cannot be negative').max(100000, 'Price can be at most ₹1,00,000'),
   color: z.string().regex(/^#[0-9a-f]{6}$/i, 'Color must be a hex code like #6366f1').optional(),
 });
 const row = z.object({
   label: z.string().trim().min(1).max(3).regex(/^[A-Za-z0-9]+$/, 'Row labels are letters/numbers').transform((s) => s.toUpperCase()),
-  seats: z.number().int().min(1).max(60),
-  tier: z.string().trim().min(1),
+  seats: z.number('Seats must be a number').int().min(1, 'A row needs at least 1 seat').max(60, 'A row can have at most 60 seats'),
+  tier: z.string().trim().min(1, 'Pick a tier for every row'),
 });
 
 const eventBody = z.object({
-  title: z.string().trim().min(3).max(120),
+  title: z.string().trim().min(3, 'Title must be at least 3 characters').max(120, 'Title must be 120 characters or fewer'),
   description: z.string().trim().max(4000).default(''),
-  category: z.enum(CATEGORIES),
-  venue: z.object({ name: z.string().trim().min(2).max(120), city: z.string().trim().min(2).max(60) }),
-  startsAt: z.coerce.date().refine((d) => d > new Date(), 'Start time must be in the future'),
-  durationMinutes: z.number().int().min(15).max(1440).default(120),
-  coverImageUrl: z.union([z.url(), z.literal('')]).default(''),
-  tiers: z.array(tier).min(1).max(6),
-  rows: z.array(row).min(1).max(40),
+  category: z.enum(CATEGORIES, 'Choose a category'),
+  venue: z.object({
+    name: z.string().trim().min(2, 'Venue name is required').max(120),
+    city: z.string().trim().min(2, 'City is required').max(60),
+  }),
+  startsAt: z.coerce.date('Enter a valid start date and time').refine((d) => d > new Date(), 'Start time must be in the future'),
+  durationMinutes: z.number('Duration must be a number').int().min(15, 'Duration must be at least 15 minutes').max(1440, 'Duration can be at most 24 hours').default(120),
+  coverImageUrl: z.union([z.url('Cover image must be a valid URL'), z.literal('')], 'Cover image must be a valid URL').default(''),
+  tiers: z.array(tier).min(1, 'Add at least one ticket tier').max(6, 'At most 6 tiers'),
+  rows: z.array(row).min(1, 'Add at least one row').max(40, 'At most 40 rows'),
 });
 
 // Once published the layout and price are frozen: buyers have already seen them.
