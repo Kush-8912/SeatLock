@@ -1,0 +1,15 @@
+{
+  "name": "seatlock",
+  "private": true,
+  "description": "Reserved-seat event ticketing with live seat holds, idempotent checkout and QR check-in",
+  "scripts": {
+    "install:all": "npm ci --prefix server && npm ci --prefix client --include=dev",
+    "build": "npm run build --prefix client",
+    "start": "npm start --prefix server",
+    "test": "npm test --prefix server",
+    "seed": "npm run seed --prefix server"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

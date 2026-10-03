@@ -18,7 +18,18 @@ export function createApp() {
   const app = express();
 
   app.set('trust proxy', 1); // behind Render's proxy: needed for secure cookies + rate limiting by real IP
-  app.use(helmet({ contentSecurityPolicy: isProd ? undefined : false }));
+  app.use(helmet({
+    contentSecurityPolicy: isProd
+      ? {
+          directives: {
+            // Organizers can use any HTTPS image as an event cover.
+            'img-src': ["'self'", 'data:', 'https:'],
+            // Same-origin websocket for live seat updates.
+            'connect-src': ["'self'", 'wss:', 'ws:'],
+          },
+        }
+      : false,
+  }));
   app.use(cors({ origin: env.CLIENT_ORIGIN, credentials: true }));
   app.use(express.json({ limit: '100kb' }));
   app.use(cookieParser());

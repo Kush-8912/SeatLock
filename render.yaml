@@ -1,0 +1,23 @@
+# Render Blueprint: one Node web service that serves both the API and the
+# built React client (single origin). MongoDB is hosted on MongoDB Atlas.
+services:
+  - type: web
+    name: seatlock
+    runtime: node
+    plan: free
+    buildCommand: npm run install:all && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "22"
+      - key: MONGODB_URI
+        sync: false # set in the Render dashboard (Atlas connection string)
+      - key: JWT_SECRET
+        generateValue: true
+      - key: TICKET_SIGNING_SECRET
+        generateValue: true
+      - key: HOLD_TTL_MINUTES
+        value: "8"
