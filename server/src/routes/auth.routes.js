@@ -6,11 +6,12 @@ import { validate } from '../middleware/validate.js';
 import { requireAuth, signToken, setAuthCookie, clearAuthCookie } from '../middleware/auth.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { AppError } from '../utils/AppError.js';
+import { env } from '../config/env.js';
 
 export const authRouter = Router();
 
 // Slow down credential stuffing / brute force on the auth endpoints only.
-const authLimiter = rateLimit({ windowMs: 15 * 60_000, limit: 20, standardHeaders: 'draft-8', legacyHeaders: false,
+const authLimiter = rateLimit({ windowMs: 15 * 60_000, limit: 20, skip: () => env.NODE_ENV === 'test', standardHeaders: 'draft-8', legacyHeaders: false,
   message: { error: { message: 'Too many attempts. Try again in a few minutes.', code: 'RATE_LIMITED' } } });
 
 const registerSchema = z.object({

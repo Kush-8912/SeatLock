@@ -50,7 +50,7 @@ export async function publishEvent(event) {
   const claimed = await Event.findOneAndUpdate(
     { _id: event._id, status: 'draft' },
     { status: 'published', publishedAt: new Date() },
-    { new: true },
+    { returnDocument: 'after' },
   );
   if (!claimed) throw AppError.conflict('Only draft events can be published');
 

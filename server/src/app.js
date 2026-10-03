@@ -24,7 +24,7 @@ export function createApp() {
   app.use(cookieParser());
   if (env.NODE_ENV === 'development') app.use(morgan('dev'));
 
-  app.use('/api', rateLimit({ windowMs: 60_000, limit: 300, standardHeaders: 'draft-8', legacyHeaders: false }));
+  app.use('/api', rateLimit({ windowMs: 60_000, limit: 300, skip: () => env.NODE_ENV === 'test', standardHeaders: 'draft-8', legacyHeaders: false }));
 
   app.get('/api/health', (_req, res) => {
     res.json({ status: 'ok', db: mongoose.connection.readyState === 1 ? 'up' : 'down' });

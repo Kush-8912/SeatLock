@@ -2,6 +2,8 @@ import http from 'node:http';
 import { env } from './config/env.js';
 import { connectDB, disconnectDB } from './config/db.js';
 import { createApp } from './app.js';
+import { initSocket } from './realtime/socket.js';
+import { startHoldSweeper } from './jobs/holdSweeper.js';
 
 async function main() {
   await connectDB(env.MONGODB_URI);
@@ -9,11 +11,14 @@ async function main() {
 
   const app = createApp();
   const server = http.createServer(app);
+  initSocket(server);
+  const stopSweeper = startHoldSweeper();
 
   server.listen(env.PORT, () => console.log(`SeatLock API listening on :${env.PORT}`));
 
   const shutdown = async (signal) => {
     console.log(`${signal} received, shutting down`);
+    stopSweeper();
     server.close();
     await disconnectDB();
     process.exit(0);

@@ -1,0 +1,15 @@
+// Thin indirection so services can publish real-time updates without
+// depending on socket.io (and stay silent in tests where no server exists).
+let io = null;
+
+export function attachIO(instance) {
+  io = instance;
+}
+
+export const eventRoom = (eventId) => `event:${eventId}`;
+
+// seats: [{ id, status }] — clients merge these into their local seat map.
+export function emitSeatChanges(eventId, seats) {
+  if (!io || seats.length === 0) return;
+  io.to(eventRoom(eventId)).emit('seats:update', { eventId: String(eventId), seats });
+}
