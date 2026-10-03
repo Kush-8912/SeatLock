@@ -1,6 +1,8 @@
 import mongoose from 'mongoose';
 
-export const HOLD_STATUS = ['active', 'converted', 'released', 'expired'];
+// active -> converting (checkout in progress, locks out the sweeper and a second
+// checkout) -> converted | back to active on payment failure.
+export const HOLD_STATUS = ['active', 'converting', 'converted', 'released', 'expired'];
 
 // A temporary reservation of seats while the buyer checks out.
 const holdSchema = new mongoose.Schema(

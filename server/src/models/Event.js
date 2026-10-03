@@ -48,7 +48,7 @@ eventSchema.index({ status: 1, startsAt: 1 });
 eventSchema.index({ 'venue.city': 1 });
 
 eventSchema.virtual('capacity').get(function capacity() {
-  return this.rows.reduce((sum, r) => sum + r.seats, 0);
+  return this.rows?.reduce((sum, r) => sum + r.seats, 0);
 });
 
 // Sales close when the doors open.

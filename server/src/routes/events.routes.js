@@ -7,6 +7,7 @@ import { validate } from '../middleware/validate.js';
 import { requireAuth, requireRole, verifyToken, AUTH_COOKIE } from '../middleware/auth.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { AppError } from '../utils/AppError.js';
+import { cancelEvent } from '../services/orderService.js';
 import { assertValidLayout, publishEvent, availabilityFor, seatMapFor, minPrice } from '../services/eventService.js';
 
 export const eventsRouter = Router();
@@ -146,4 +147,11 @@ eventsRouter.delete('/:id', requireAuth, requireRole('organizer'), asyncHandler(
   if (event.status !== 'draft') throw AppError.conflict('Only drafts can be deleted. Cancel a published event instead.');
   await Promise.all([event.deleteOne(), Seat.deleteMany({ event: event._id })]);
   res.status(204).end();
+}));
+
+// Cancels sales, releases holds and refunds every paid order.
+eventsRouter.post('/:id/cancel', requireAuth, requireRole('organizer'), asyncHandler(async (req, res) => {
+  const event = await loadOwnedEvent(req);
+  const { event: cancelled, refunded } = await cancelEvent(event);
+  res.json({ event: cancelled, refunded });
 }));
