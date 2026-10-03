@@ -13,3 +13,7 @@ export function emitSeatChanges(eventId, seats) {
   if (!io || seats.length === 0) return;
   io.to(eventRoom(eventId)).emit('seats:update', { eventId: String(eventId), seats });
 }
+
+export function emitCheckin(eventId, checkin) {
+  io?.to(eventRoom(eventId)).emit('checkin', { eventId: String(eventId), ...checkin });
+}
